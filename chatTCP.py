@@ -9,6 +9,10 @@ sock.bind(('', 7777))
 sock.listen(1)
 
 connects = [sock]
+#sock = serveur
+#connections = [j0, j1]
+#observeurs = [...]
+
 def connector(acpt) :
     while True :
         message = acpt.recv(2048)

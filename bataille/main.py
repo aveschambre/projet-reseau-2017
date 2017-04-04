@@ -18,7 +18,7 @@ def randomConfiguration():
             boats = boats + [Boat(x,y,LENGTHS_REQUIRED[i],isHorizontal)]
     return boats
 
-    
+
 
 def displayConfiguration(boats, shots=[], showBoats=True):
     Matrix = [[" " for x in range(WIDTH+1)] for y in range(WIDTH+1)]
@@ -53,11 +53,10 @@ def displayConfiguration(boats, shots=[], showBoats=True):
         print(l)
 
 """ display the game viewer by the player"""
-def displayGame(game, player):
+def displayGame(game, player, ):
     otherPlayer = (player+1)%2
     displayConfiguration(game.boats[player], game.shots[otherPlayer], showBoats=True)
     displayConfiguration([], game.shots[player], showBoats=False)
-
 
 
 """ Play a new random shot """
@@ -68,11 +67,30 @@ def randomNewShot(shots):
     return (x,y)
 
 def main():
+
     boats1 = randomConfiguration()
     boats2 = randomConfiguration()
     game = Game(boats1, boats2)
     displayGame(game, 0)
     print("======================")
+
+
+""" Find Clients (2)
+    start game
+    (how to avoid disconnections ?)
+    while game
+        for players
+            message player
+            validate input
+            make move
+            send game state to players
+        check game over
+
+fonction de changer -
+    displayGame
+    main
+
+"""
 
     currentPlayer = 0
     displayGame(game, currentPlayer)
