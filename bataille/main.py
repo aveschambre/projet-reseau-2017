@@ -1,10 +1,12 @@
 #!/usr/bin/python3
-
+from chatTCP import *
 from game import *
 import  random
 import time
+from collections import namedtuple
 
-
+MAX_CONNECTS = 3
+Player = namedtuple("Player", "socket addr num")
 
 """ generate a random valid configuration """
 def randomConfiguration():
@@ -50,13 +52,13 @@ def displayConfiguration(boats, shots=[], showBoats=True):
                 l = l + " "
         for x in range(1,WIDTH+1):
             l = l + str(Matrix[x][y]) + " "
-        print(l)
+        return l
 
 """ display the game viewer by the player"""
 def displayGame(game, player, ):
     otherPlayer = (player+1)%2
-    displayConfiguration(game.boats[player], game.shots[otherPlayer], showBoats=True)
-    displayConfiguration([], game.shots[player], showBoats=False)
+    sendMessage(player, displayConfiguration(game.boats[player], game.shots[otherPlayer], showBoats=True)
+    sendMessage(otherPlayer, displayConfiguration([], game.shots[player], showBoats=False)
 
 
 """ Play a new random shot """
@@ -66,13 +68,51 @@ def randomNewShot(shots):
         (x,y) = (random.randint(1,10), random.randint(1,10))
     return (x,y)
 
-def main():
-
+def startGame() :
     boats1 = randomConfiguration()
     boats2 = randomConfiguration()
     game = Game(boats1, boats2)
     displayGame(game, 0)
     print("======================")
+    return game
+
+def sendMessage(player, message) :
+    print(message)
+    if (skt != socks[x]) and (skt != sock)  :
+        connects[player.num+1].send(message)
+
+def waitMessage(player, socks ) :
+    while True :
+        message = connects[player.num].recv(2048)
+        if len(message) == 0 :
+            connects[x].socket.close()
+            connects.remove(player)
+            return None
+        return message
+
+
+def main():
+
+    #make sockets
+    sock = socket.socket(family=socket.AF_INET6, type=socket.SOCK_STREAM, proto=0)
+
+    sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    sock.bind(('', 7777))
+    sock.listen(1)
+    connects = [sock]
+
+    #wait for clients
+    while True :
+        (socks,_,_) = select.select(connects, [], [])
+        for x in range(0, len(socks), 1) :
+            if socks[x] == sock && len(connects) < 3 :
+                acpt, addr = sock.accept()
+                player = Player(socket=acpt, addr = addr. num = len(socks-1))
+                connects.append(player);
+            else if len(connects) >= 3
+                break;
+
+
 
 
 """ Find Clients (2)
@@ -86,32 +126,45 @@ def main():
             send game state to players
         check game over
 
-fonction de changer -
+fonctions to change -
     displayGame
     main
 
 """
+    game = startGame()
 
     currentPlayer = 0
     displayGame(game, currentPlayer)
     while gameOver(game) == -1:
         print("======================")
         if currentPlayer == J0:
-            x_char = input ("quelle colonne ? ")
-            x_char.capitalize()
-            x = ord(x_char)-ord("A")+1
-            y = int(input ("quelle ligne ? "))
+            sendMessage(0, "quelle colonne ? ")
+            x_char = waitMessage(0, connects)
+            if x_char != None :
+                x_char.capitalize()
+                x = ord(x_char)-ord("A")+1
+                sendMessage(0, "quelle ligne ? ")
+                y = waitMessage(0, connects)
+                if y != None
+                    y = int(y)
+                else:
+                    break;
+            else:
+                break;
         else:
             (x,y) = randomNewShot(game.shots[currentPlayer])
             time.sleep(1)
         addShot(game, x, y, currentPlayer)
         displayGame(game, 0)
         currentPlayer = (currentPlayer+1)%2
-    print("game over")
-    print("your grid :")
-    displayGame(game, J0)
-    print("the other grid :")
-    displayGame(game, J1)
+
+    for i in range(0, len(socks), 1 :
+
+        print("game over")
+        print("your grid :")
+        displayGame(game, i)
+        print("the other grid :")
+        displayGame(game, i)
 
     if gameOver(game) == J0:
         print("You win !")
