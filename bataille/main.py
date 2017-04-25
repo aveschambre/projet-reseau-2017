@@ -1,6 +1,7 @@
 #!/usr/bin/python3
-from chatTCP import *
 from game import *
+import socket
+import select
 import  random
 import time
 from collections import namedtuple
@@ -55,11 +56,16 @@ def displayConfiguration(boats, shots=[], showBoats=True):
         return l
 
 """ display the game viewer by the player"""
-def displayGame(game, player, ):
-    otherPlayer = (player+1)%2
-    sendMessage(player, displayConfiguration(game.boats[player], game.shots[otherPlayer], showBoats=True)
-    sendMessage(otherPlayer, displayConfiguration([], game.shots[player], showBoats=False)
+def displayGame(game, players, currentPlayer):
+    #players = [addr, socket, 0; ...], currentPlayer = [0,1]
+    otherPlayer = (currentPlayer+1)%2
+    sendMessage(players[currentPlayer], displayConfiguration(game.boats[currentPlayer], game.shots[otherPlayer], showBoats=True))
+    sendMessage(players[otherPlayer], displayConfiguration([], game.shots[currentPlayer], showBoats=False))
 
+
+def sendMessage(player, mesg):
+    print(player)
+    player.socket.send(bytes(mesg, 'utf-8'))
 
 """ Play a new random shot """
 def randomNewShot(shots):
@@ -68,31 +74,27 @@ def randomNewShot(shots):
         (x,y) = (random.randint(1,10), random.randint(1,10))
     return (x,y)
 
-def startGame() :
+def startGame(players) :
     boats1 = randomConfiguration()
     boats2 = randomConfiguration()
     game = Game(boats1, boats2)
-    displayGame(game, 0)
+    displayGame(game, players, 0)
     print("======================")
     return game
 
-def sendMessage(player, message) :
-    print(message)
-    if (skt != socks[x]) and (skt != sock)  :
-        connects[player.num+1].send(message)
-
-def waitMessage(player, socks ) :
+def waitMessage(player, players) :
     while True :
-        message = connects[player.num].recv(2048)
+        message = player.socket.recv(2048)
         if len(message) == 0 :
-            connects[x].socket.close()
-            connects.remove(player)
+            #Add code for monitor closing sockets
+            #players[x].socket.close()
+            #players.remove(player)
             return None
         return message
 
 
 def main():
-
+    print("this works")
     #make sockets
     sock = socket.socket(family=socket.AF_INET6, type=socket.SOCK_STREAM, proto=0)
 
@@ -100,52 +102,39 @@ def main():
     sock.bind(('', 7777))
     sock.listen(1)
     connects = [sock]
+    players = []
+
+    print("Waiting for clients")
 
     #wait for clients
     while True :
         (socks,_,_) = select.select(connects, [], [])
         for x in range(0, len(socks), 1) :
-            if socks[x] == sock && len(connects) < 3 :
+            if (socks[x] == sock) & (len(connects) < 3) :
+                print("New Player!")
                 acpt, addr = sock.accept()
-                player = Player(socket=acpt, addr = addr. num = len(socks-1))
-                connects.append(player);
-            else if len(connects) >= 3
-                break;
+                player = Player(socket=acpt, addr = addr, num=len(socks)-1)
+                connects.append(player.socket);
+                players.append(player)
+        if (len(connects) >= MAX_CONNECTS) :
+            print("No new players :(")
+            break;
 
-
-
-
-""" Find Clients (2)
-    start game
-    (how to avoid disconnections ?)
-    while game
-        for players
-            message player
-            validate input
-            make move
-            send game state to players
-        check game over
-
-fonctions to change -
-    displayGame
-    main
-
-"""
-    game = startGame()
+    game = startGame(players)
 
     currentPlayer = 0
-    displayGame(game, currentPlayer)
+    displayGame(game, players, currentPlayer)
     while gameOver(game) == -1:
         print("======================")
         if currentPlayer == J0:
-            sendMessage(0, "quelle colonne ? ")
-            x_char = waitMessage(0, connects)
+            sendMessage(players[0], "quelle colonne ? ")
+            x_char = waitMessage(players[0], connects)
             if x_char != None :
                 x_char.capitalize()
                 x = ord(x_char)-ord("A")+1
-                sendMessage(0, "quelle ligne ? ")
-                y = waitMessage(0, connects)
-                if y != None
+                sendMessage(players[0], "quelle ligne ? ")
+                y = waitMessage(players[0], connects)
+                if y != None :
                     y = int(y)
                 else:
                     break;
@@ -155,16 +144,16 @@ fonctions to change -
             (x,y) = randomNewShot(game.shots[currentPlayer])
             time.sleep(1)
         addShot(game, x, y, currentPlayer)
-        displayGame(game, 0)
+        displayGame(game, players, 0)
         currentPlayer = (currentPlayer+1)%2
 
-    for i in range(0, len(socks), 1 :
+    for i in range(0, len(socks), 1):
 
         print("game over")
         print("your grid :")
-        displayGame(game, i)
+        displayGame(game, players, i)
         print("the other grid :")
-        displayGame(game, i)
+        displayGame(game, players, i)
 
     if gameOver(game) == J0:
         print("You win !")
