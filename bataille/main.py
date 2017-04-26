@@ -1,5 +1,6 @@
 #!/usr/bin/python3
 from game import *
+import utils.py
 import socket
 import select
 import  random
@@ -69,7 +70,7 @@ def displayGame(game, players, currentPlayer):
 
 def sendMessage(player, mesg):
     print(player)
-    player.socket.send(mesg) #removed "utf-8"
+    player.socket.send(mesg.encode('utf-8')) #removed "utf-8"
 
 """ Play a new random shot """
 def randomNewShot(shots):
@@ -128,7 +129,6 @@ def main():
     game = startGame(players)
 
     currentPlayer = 0
-    displayGame(game, players, currentPlayer)
     while gameOver(game) == -1:
         print("======================") #>>>> utils shot validation
         if currentPlayer == J0:
