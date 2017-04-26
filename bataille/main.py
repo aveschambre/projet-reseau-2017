@@ -65,7 +65,7 @@ def displayGame(game, players, currentPlayer):
 
 def sendMessage(player, mesg):
     print(player)
-    player.socket.send(bytes(mesg, 'utf-8'))
+    player.socket.send(mesg) #removed "utf-8"
 
 """ Play a new random shot """
 def randomNewShot(shots):
@@ -90,7 +90,7 @@ def waitMessage(player, players) :
             #players[x].socket.close()
             #players.remove(player)
             return None
-        return message
+        return message.splitlines()
 
 
 def main():
@@ -130,12 +130,13 @@ def main():
             sendMessage(players[0], "quelle colonne ? ")
             x_char = waitMessage(players[0], connects)
             if x_char != None :
-                x_char.capitalize()
-                x = ord(x_char)-ord("A")+1
+                x_char[0].capitalize()
+                print(x_char)
+                x = ord(x_char[0])-ord("A")+1
                 sendMessage(players[0], "quelle ligne ? ")
                 y = waitMessage(players[0], connects)
                 if y != None :
-                    y = int(y)
+                    y = int(y[0])
                 else:
                     break;
             else:
