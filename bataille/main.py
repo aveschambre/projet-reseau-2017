@@ -48,19 +48,23 @@ def displayConfiguration(boats, shots=[], showBoats=True):
         if y == 0:
             l = "  "
         else:
-            l = str(y)
+            l += "\n"
+            l += str(y)
             if y < 10:
                 l = l + " "
         for x in range(1,WIDTH+1):
             l = l + str(Matrix[x][y]) + " "
-        return l
+    l += "\n"
+    return l
 
 """ display the game viewer by the player"""
 def displayGame(game, players, currentPlayer):
     #players = [addr, socket, 0; ...], currentPlayer = [0,1]
     otherPlayer = (currentPlayer+1)%2
-    sendMessage(players[currentPlayer], displayConfiguration(game.boats[currentPlayer], game.shots[otherPlayer], showBoats=True))
-    sendMessage(players[otherPlayer], displayConfiguration([], game.shots[currentPlayer], showBoats=False))
+    display1 = displayConfiguration(game.boats[currentPlayer], game.shots[otherPlayer], showBoats=True)
+    display2 = displayConfiguration([], game.shots[otherPlayer], showBoats=False)
+    sendMessage(players[currentPlayer], "Your Game:\n" + display1 + "\n")
+    sendMessage(players[otherPlayer], "Your Shots:\n" + display2 + "\n")
 
 
 def sendMessage(player, mesg):
@@ -79,6 +83,7 @@ def startGame(players) :
     boats2 = randomConfiguration()
     game = Game(boats1, boats2)
     displayGame(game, players, 0)
+    displayGame(game, players, 1)
     print("======================")
     return game
 
@@ -125,14 +130,13 @@ def main():
     currentPlayer = 0
     displayGame(game, players, currentPlayer)
     while gameOver(game) == -1:
-        print("======================")
+        print("======================") #>>>> utils shot validation
         if currentPlayer == J0:
             sendMessage(players[0], "quelle colonne ? ")
             x_char = waitMessage(players[0], connects)
             if x_char != None :
-                x_char[0].capitalize()
-                print(x_char)
-                x = ord(x_char[0])-ord("A")+1
+                x_char[0] = x_char[0].upper()
+                x = ord(x_char[0].upper())-ord("A")+1
                 sendMessage(players[0], "quelle ligne ? ")
                 y = waitMessage(players[0], connects)
                 if y != None :
@@ -145,8 +149,11 @@ def main():
             (x,y) = randomNewShot(game.shots[currentPlayer])
             time.sleep(1)
         addShot(game, x, y, currentPlayer)
-        displayGame(game, players, 0)
+        #Select here for awaiting connections and add them
+        #this also allows us to validate that the players are still here
+        displayGame(game, players, currentPlayer)
         currentPlayer = (currentPlayer+1)%2
+
 
     for i in range(0, len(socks), 1):
 
