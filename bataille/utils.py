@@ -1,5 +1,10 @@
 import socket
+import select
+from collections import namedtuple
 #Shot Validation
+
+Player = namedtuple("Player", "socket addr num")
+
 
 def xStandardization(input):
 	if input != None :
@@ -20,9 +25,34 @@ def yStandardization(input):
 
 #other validations ?
 
+#player
+def waitClientReconnect(players, connects, observers) :
+    while True :
+        (socks,_,_) = select.select(connects, [], [])
+        for x in range(0, len(socks), 1) :
+            if (socks[x] == connects[0]) :
+                acpt, addr = connects[0].accept()
+                for play in players :
+                    print(addr, " ", play.addr)
+                    if addr[0] == play.addr[0] :
+                        print("Player Reconnect!")
+                        playerReconn = Player(socket=acpt, addr = addr, num=play.num)
+                        players[players.index(play)] = playerReconn
+                        return
 
-def waitClientReconnect() :
-    return
+                #Someone else wants to watch the game? OK
+                print("New Observer!")
+                observer = Player(socket=acpt, addr = addr, num=len(connects))
+                connects.append(observer.socket)
+                observers.append(observer)
+
+            else :
+                print("help")
+                message = socks[x].recv(2048)
+                if len(message) == 0 :
+                    socks[x].close()
+                    connects.remove(socks[x])
+                    print("Removing Connection")
 
 def createServerSocket() :
     HOST = None

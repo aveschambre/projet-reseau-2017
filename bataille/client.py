@@ -4,7 +4,7 @@ import socket
 import select
 import  random
 import time
-from collections import namedtuple
+#from collections import namedtuple
 
 def clientConnect(servername, port) :
 
@@ -20,12 +20,12 @@ def clientGame(client) :
         if len(data) == 0 :
             client.close()
             break;
-        elif data.endswith(b'?') :
-            print("Waiting for response")
-            response = input(data.decode("utf-8") + " ")
+        elif data.endswith(b'? ') :
+            #print("Waiting for response")
+            response = input(data.decode("utf-8"))
             client.send(response.encode("utf-8"))
         else:
-            print ("RECIEVED:" , data.decode("utf-8"))
+            print(data.decode("utf-8"))
     return
 
 def clientObserve(client) :

@@ -1,11 +1,8 @@
 #!/usr/bin/python3
 from game import *
 from utils import *
-import socket
-import select
 import  random
 import time
-from collections import namedtuple
 import sys
 
 import client
@@ -13,7 +10,7 @@ import client
 MAX_CONNECTS = 3
 SERVER_NAME = '127.0.0.1'
 PORT = 7777
-Player = namedtuple("Player", "socket addr num")
+
 
 """ generate a random valid configuration """
 def randomConfiguration():
@@ -82,7 +79,6 @@ def broadcastGame(game, observers):
 
 
 def sendMessage(player, mesg):
-    #print(player)
     player.socket.send(mesg.encode('utf-8'))
 
 """ Play a new random shot """
@@ -113,26 +109,22 @@ def waitMessage(player, players) :
 
 
 def main():
-
-
     if(len(sys.argv) > 1) :
-        print("I am client")
         client.clientConnect(sys.argv[1], PORT)
         return
 
-    #else I am Server, let's play the game.
-    print("I am server")
-    #make sockets
+
+    #Start Server Procedure
     sock = socket.socket(family=socket.AF_INET6, type=socket.SOCK_STREAM, proto=0)
 
     sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     sock.bind(('', PORT))
-    print(sock.getsockname())
     sock.listen(1)
 
     #sock = createServerSocket()
     connects = [sock]
     players = []
+    observers = []
 
     print("Waiting for clients")
 
@@ -144,46 +136,52 @@ def main():
                 print("New Player!")
                 acpt, addr = sock.accept()
                 player = Player(socket=acpt, addr = addr, num=len(socks)-1)
-                connects.append(player.socket);
+                connects.append(player.socket)
                 players.append(player)
         if (len(connects) >= MAX_CONNECTS) :
-            print("No new players :(")
             break;
 
     game = startGame(players)
 
     currPlayer = 0
     while gameOver(game) == -1:
-        #print("======================") #>>>> utils shot validation
         print("currentPlayer = ", currPlayer)
-        sendMessage(players[currPlayer], "quelle colonne ?")
-        x_char = waitMessage(players[currPlayer], connects)
-        if x_char != None :
-            x = xStandardization(x_char)
-            sendMessage(players[currPlayer], "quelle ligne ?")
-            y = waitMessage(players[currPlayer], connects)
-            if y != None :
-                y = yStandardization(y)
+
+        while True :
+            sendMessage(players[currPlayer], "quelle colonne ? ")
+            x_char = waitMessage(players[currPlayer], connects)
+            if x_char != None :
+                x = xStandardization(x_char)
+                print("x = " , x)
+                if (x >= 0) & (x <= 10) : #Use ascii values to compare
+                    sendMessage(players[currPlayer], "quelle ligne ? ")
+                    y = waitMessage(players[currPlayer], connects)
+                    if y != None :
+                        y = yStandardization(y)
+                        if (y>= 0) & (y <= 10) :
+                            break;
+                    else:
+                        waitClientReconnect( players, connects, observers)
+                        continue
             else:
-                break; #handle client disconnect
-        else:
-            break; #handle handle client disconnect
+                waitClientReconnect( players, connects, observers)
+                continue
+
+            sendMessage(players[currPlayer], "Your Input was invalid\n")
 
         #(x,y) = randomNewShot(game.shots[currentPlayer])
         #time.sleep(1)
         addShot(game, x, y, currPlayer)
         #Select here for awaiting connections and add them
         #this also allows us to validate that the players are still here
-        observers = []
+        #observers = []
         print("observer check")
-        print(connects)
         (socks,_,_) = select.select(connects, [], [], 0)
-        print(socks)
         for x in range(0, len(socks), 1) :
             if (socks[x] == sock) :
                 print("New Observer!")
                 acpt, addr = sock.accept()
-                obsvr = Player(socket=acpt, addr = addr, num=len(socks)-1)
+                obsvr = Player(socket=acpt, addr = addr, num=len(connects))
                 observers.append(obsvr)
                 connects.append(obsvr.socket)
             else:
@@ -191,10 +189,12 @@ def main():
                 if len(message) == 0 :
                     socks[x].close()
                     connects.remove(socks[x])
-                    if socks[x] in players :
-                        break #handle reconnections
+                    print("Removing Connection")
+                    for player in players :
+                        if socks[x] == player.socket:
+                            waitClientReconnect(players, connects, observers)
 
-        print("After Observers")
+
         displayGame(game, players, currPlayer)
         broadcastGame(game, observers);
         currPlayer = (currPlayer+1)%2
