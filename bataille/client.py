@@ -16,17 +16,19 @@ def clientConnect(servername, port) :
 
 def clientGame(client) :
     while True:
-        data = client.recv(1024)
-        if data == 0 :
-            client_socket.close()
+        data = client.recv(2048)
+        if len(data) == 0 :
+            client.close()
             break;
+        elif data.endswith(b'?') :
+            print("Waiting for response")
+            response = input(data.decode("utf-8") + " ")
+            client.send(response.encode("utf-8"))
         else:
-            print ("RECIEVED:" , data)
-            response = input(prompt=data)
-            client.send(response)
+            print ("RECIEVED:" , data.decode("utf-8"))
     return
 
 def clientObserve(client) :
     return
 
-clientConnect('localhost', 7777)
+#clientConnect('localhost', 7777)
