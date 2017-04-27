@@ -159,11 +159,11 @@ def main():
         sendMessage(players[currPlayer], "quelle colonne ?")
         x_char = waitMessage(players[currPlayer], connects)
         if x_char != None :
-            x = inputStandardization(x_char)
+            x = xStandardization(x_char)
             sendMessage(players[currPlayer], "quelle ligne ?")
             y = waitMessage(players[currPlayer], connects)
             if y != None :
-                y = int(y[0])
+                y = yStandardization(y)
             else:
                 break; #handle client disconnect
         else:
