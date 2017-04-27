@@ -74,8 +74,12 @@ def broadcastGame(game, observers):
     display1 = displayConfiguration(game.boats[0], game.shots[1], showBoats=True)
     display2 = displayConfiguration(game.boats[1], game.shots[0], showBoats=True)
     for observer in observers:
+        if gameOver(game) == -1
+            sendMessage(observer, "Game Over!\n")
+
         sendMessage(observer, "Player 1's Game:\n" + display1 + "\n")
         sendMessage(observer, "Player 2's Game:\n" + display2 + "\n")
+
 
 
 def sendMessage(player, mesg):
@@ -178,7 +182,7 @@ def main():
 
         (socks,_,_) = select.select(connects, [], [], 0)
         for x in range(0, len(socks), 1) :
-            if (socks[x] == sockprint("game over") :
+            if (socks[x] == sock)
                 print("New Observer!")
                 acpt, addr = sock.accept()
                 obsvr = Player(socket=acpt, addr = addr, num=len(connects))
@@ -212,6 +216,6 @@ def main():
         sendMessage(players[1], "you loose !")
     else:
         sendMessage(players[0], "you loose !")
-        sendMessage(players[1], "You win !")
-    return 0;
+        sendMessage(players[0], "You win !")
+
 main()

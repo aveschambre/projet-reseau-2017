@@ -9,9 +9,6 @@ import time
 def clientConnect(servername, port) :
 
     client = socket.create_connection((servername, port))
-    
-    print(client)
-
     clientGame(client);
 
 
@@ -22,7 +19,6 @@ def clientGame(client) :
             client.close()
             break;
         elif data.endswith(b'? ') :
-            #print("Waiting for response")
             response = input(data.decode("utf-8"))
             client.send(response.encode("utf-8"))
         else:
