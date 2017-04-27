@@ -1,7 +1,7 @@
 import socket
 import select
 from collections import namedtuple
-#Shot Validation
+
 
 Player = namedtuple("Player", "socket addr num")
 
@@ -17,11 +17,13 @@ def xStandardization(input):
 
 def yStandardization(input):
 	if input != None :
-		if len(input[0]) > 1:
-			first = input[0]
-			first = first[:1]
-			return int(first)
-		return (int(input[0]))
+		try:
+			ret = int(input[0])
+			return ret
+		except ValueError:
+			return -1
+	else :
+		return -1
 
 #other validations ?
 
