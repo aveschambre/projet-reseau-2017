@@ -175,10 +175,10 @@ def main():
         #Select here for awaiting connections and add them
         #this also allows us to validate that the players are still here
         #observers = []
-        print("observer check")
+
         (socks,_,_) = select.select(connects, [], [], 0)
         for x in range(0, len(socks), 1) :
-            if (socks[x] == sock) :
+            if (socks[x] == sockprint("game over") :
                 print("New Observer!")
                 acpt, addr = sock.accept()
                 obsvr = Player(socket=acpt, addr = addr, num=len(connects))
@@ -200,17 +200,18 @@ def main():
         currPlayer = (currPlayer+1)%2
 
 
-    (socks,_,_) = select.select(connects, [], [])
-    for i in range(0, len(socks), 1):
-        if (socks[i] != sock) :
+    #(socks,_,_) = select.select(connects, [], [])
+    #for i in range(0, len(socks), 1):
+        #if (socks[i] != sock) :
 
-            print("game over")
-            broadcastGame(game, observers)
-            broadcastGame(players)
+    broadcastGame(game, observers)
+    broadcastGame(players)
 
     if gameOver(game) == J0:
-        print("You win !")
+        sendMessage(players[0], "You win !")
+        sendMessage(players[1], "you loose !")
     else:
-        print("you loose !")
-
+        sendMessage(players[0], "you loose !")
+        sendMessage(players[1], "You win !")
+    return 0;
 main()

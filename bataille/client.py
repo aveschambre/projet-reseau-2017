@@ -9,6 +9,7 @@ import time
 def clientConnect(servername, port) :
 
     client = socket.create_connection((servername, port))
+    
     print(client)
 
     clientGame(client);
