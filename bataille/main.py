@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 from game import *
-import utils.py
+from utils import *
 import socket
 import select
 import  random
@@ -135,8 +135,7 @@ def main():
             sendMessage(players[0], "quelle colonne ? ")
             x_char = waitMessage(players[0], connects)
             if x_char != None :
-                x_char[0] = x_char[0].upper()
-                x = ord(x_char[0].upper())-ord("A")+1
+                x = inputStandardization(x_char)
                 sendMessage(players[0], "quelle ligne ? ")
                 y = waitMessage(players[0], connects)
                 if y != None :
